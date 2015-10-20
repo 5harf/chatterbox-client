@@ -11,24 +11,27 @@ HELPER FUNCTIONS
 */
 
 var createDiv = function(message, username, callback) {
-  var $div = $('<div class="message"></div>');
+  var $div = $('<div class="messages"></div>');
   var $username = $('<span class="username">' + username + ': ' + '</span>');
   var msg = escape(message); 
-
-  if (!msg.match(/%/)) {
-    if (msg.length < 140) {
-      $div.html(msg);        
+  msg = msg.replace(/%2\d/g, " ");
+  var $msg = $('<span class="message"></span>')
+  if (!msg.match(/\</) && !msg.match(/\>/)) {
+    if (msg.length < 100) {
+      $msg.html(msg);        
+      $div.prepend($msg);
       $div.prepend($username);
+      return $div;
     }
   }
   
-  return $div;
+  return undefined;
 
 };
 
 /*
 
-APP OBJECT
+GLOBAL APP OBJECT
 
 */
 var app = {};
@@ -48,11 +51,10 @@ app.send = function(message) {
     roomname: '8th floor'
   };
 
-  
   $.ajax({
     url: this.server,
     type: 'POST',
-    data: JSON.stringify(input),
+    data: JSON.stringify(message),
     contentType: 'application/json',
     success: function (data) {
       console.log('chatterbox: Message sent!');
@@ -72,19 +74,15 @@ app.fetch = function() {
     success: function(response){
 
      var $div;
-     var msg;
 
       _.each(response.results, function(message) {
-        $div = $('<div class="message"></div>');
-        $username = $('<span class="username">' + message.username+":  " + '</span>');
-        msg = escape(message.text);
-        if (!msg.match(/%/)) {
-          if (msg.length < 140) {
-            $div.html(msg);        
-            $div.prepend($username);
-            $('#chats').append($div);  
-          }
+
+        $div = createDiv(message.text, message.username);
+        
+        if ($div){
+          $('#chats').append(createDiv(message.text, message.username));
         }
+
       });
 
      },
@@ -105,30 +103,49 @@ app.escape = function (s) {
       // Only 20% of slashes are end tags; save 1.2% of total
       // bytes by only escaping those.
       var json = JSON.stringify(v).replace(/<\//g, '<\\/');
+
       return '<script>console.log('+json+')</script>';
       }).join('');
 };
 
-app.update = function(){
-  app.clear();
+app.refresh = function(){
+  app.clearMessages();
   app.fetch();
 };
 
 app.addMessage = function(message) {
   this.send(message);  
-
+  var $msg = createDiv(message.text, message.username);
+  $('#chats').prepend($msg);
 };
 
+/*
 
+JQUERY ONREADY
+
+*/
 
 $(document).ready(function() {
   $('button').on('click', function(event) {
     event.preventDefault();
-   var message = $('input[name="chat-msg"]').val();
-   $('#chat').prepend()
+    //creating info
+   var msg = $('input[name="chat-msg"]').val();
+   
+   var message = app.send(msg);
+
+   var user = window.location.search.substring(1).split('=')[1];
+   var $msg = createDiv(msg, user);
+   //adding to DOM
+   $('#chats').prepend($msg);
+   //send
+   console.log('Trying')
+  });
+
+  $('.refresh').on('click', function(event) {
+
+    app.refresh();
   });
 })
-
 
 
 app.init();
