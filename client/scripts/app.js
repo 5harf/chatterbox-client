@@ -4,6 +4,33 @@
   text: 'trololo',
   roomname: '4chan'
 };*/
+/*
+
+HELPER FUNCTIONS
+
+*/
+
+var createDiv = function(message, username, callback) {
+  var $div = $('<div class="message"></div>');
+  var $username = $('<span class="username">' + username + ': ' + '</span>');
+  var msg = escape(message); 
+
+  if (!msg.match(/%/)) {
+    if (msg.length < 140) {
+      $div.html(msg);        
+      $div.prepend($username);
+    }
+  }
+  
+  return $div;
+
+};
+
+/*
+
+APP OBJECT
+
+*/
 var app = {};
 
 app.init = function() {
@@ -38,20 +65,26 @@ app.send = function(message) {
 };
 
 app.fetch = function() {
- 
+  
   $.ajax({ 
     url: this.server, 
     type: 'GET',
     success: function(response){
 
      var $div;
+     var msg;
 
       _.each(response.results, function(message) {
-        $div = $('<div></div>');
+        $div = $('<div class="message"></div>');
         $username = $('<span class="username">' + message.username+":  " + '</span>');
-        $div.html(message.text);
-        $div.prepend($username);
-        $('#chats').append($div);  
+        msg = escape(message.text);
+        if (!msg.match(/%/)) {
+          if (msg.length < 140) {
+            $div.html(msg);        
+            $div.prepend($username);
+            $('#chats').append($div);  
+          }
+        }
       });
 
      },
@@ -62,6 +95,42 @@ app.fetch = function() {
 
 };
 
-app.clear = function() {
+app.clearMessages = function() {
+  //clears elements from DOM
+   $('#chats').empty();
+};
+
+app.escape = function (s) {
+  return s.split('#').map(function(v) {
+      // Only 20% of slashes are end tags; save 1.2% of total
+      // bytes by only escaping those.
+      var json = JSON.stringify(v).replace(/<\//g, '<\\/');
+      return '<script>console.log('+json+')</script>';
+      }).join('');
+};
+
+app.update = function(){
+  app.clear();
+  app.fetch();
+};
+
+app.addMessage = function(message) {
+  this.send(message);  
 
 };
+
+
+
+$(document).ready(function() {
+  $('button').on('click', function(event) {
+    event.preventDefault();
+   var message = $('input[name="chat-msg"]').val();
+   $('#chat').prepend()
+  });
+})
+
+
+
+app.init();
+
+

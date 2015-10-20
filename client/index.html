@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>chatterbox</title>
     <link rel="stylesheet" href="styles/styles.css">
-
+    <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
     <!-- dependencies -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
@@ -15,9 +15,15 @@
   <body>
     <div id="main">
       <h1>chatterbox</h1>
+      <form>
+        <input type ="text" name="chat-msg" placeholder="Your message here..."></input>
+        <button type ="submit"  name="submit">Submit</button>
+      </form>
       <!-- Your HTML goes here! -->
       
     </div>
-    <div id="chats"></div>
+    <div id="chats">
+    <div class="refresh">REFRESH</div>
+    </div>
   </body>
 </html>
