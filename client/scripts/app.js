@@ -13,7 +13,7 @@ var createDiv = function(message, username, callback) {
   msg = msg.replace(/%2\d/g, " ");
   var $msg = $('<span class="message"></span>')
   if (!msg.match(/\</) && !msg.match(/\>/)) {
-    if (msg.length < 100) {
+    if (msg.length < 140) {
       $msg.html(msg);        
       $div.prepend($msg);
       $div.prepend($username);
@@ -39,7 +39,8 @@ app.init = function() {
 
 app.userInfo = {
   username : null,
-  roomname :'8th floor'
+  roomname : 'hackerjack'
+
 };
 
 app.server = 'https://api.parse.com/1/classes/chatterbox';
@@ -50,7 +51,7 @@ app.send = function(message) {
   var message = {
     username: this.userInfo.username,
     text: input,
-    roomname: '8th floor'
+    roomname: this.userInfo.roomname
   };
 
   $.ajax({
@@ -69,7 +70,6 @@ app.send = function(message) {
 };
 
 app.fetch = function() {
-  var username = this.userInfo.username
   $.ajax({ 
     url: this.server, 
     type: 'GET',
@@ -79,10 +79,10 @@ app.fetch = function() {
      
       _.each(response.results, function(message) {
 
-        $div = createDiv(message.text, username);
+        $div = createDiv(message.text, message.username);
         
         if ($div){
-          $('#chats').append(createDiv(message.text, username));
+          $('#chats').append(createDiv(message.text, message.username));
         }
 
       });
@@ -117,7 +117,7 @@ app.refresh = function(){
 
 app.addMessage = function(message) {
   this.send(message);  
-  var $msg = createDiv(message.text, this.userInfo.username);
+  var $msg = createDiv(message, app.userInfo.username);
   $('#chats').prepend($msg);
 };
 
@@ -132,20 +132,29 @@ $(document).ready(function() {
     event.preventDefault();
     //creating info
    var msg = $('input[name="chat-msg"]').val();
-   var message = app.send(msg);
-
-   var $msg = createDiv(msg, app.userInfo.username);
-   //adding to DOM
-   $('#chats').prepend($msg);
-   //send
-   console.log('Trying')
+   //adds message
+   app.addMessage(msg);
+   $('input[name="chat-msg"]').val('');
   });
 
   $('.refresh').on('click', function(event) {
 
     app.refresh();
   });
-})
+
+  $('select').on('change', function(event) {
+     var selected = $('option:selected').val();
+     console.log(selected);
+      if (selected === 'createRoom'){
+        $('input[name="newRoom"]').removeClass('hidden');
+          app.userInfo.roomname = selected
+      }else {
+        $('input[name="newRoom"]').addClass('hidden');
+          console.log(selected)
+          app.userInfo.roomname = selected;
+      };
+  });
+});
 
 
 app.init();
