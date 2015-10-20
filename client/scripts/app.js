@@ -11,6 +11,11 @@ var createDiv = function(message, username, callback) {
   var $div = $('<div class="messages"></div>');
   var $username = $('<span class="username">' + username + ': ' + '</span>');
   var msg = escape(message); 
+
+  if (app.userInfo.friends[username]){
+    $username.addClass('friend');
+  }
+
   msg = msg.replace(/%2\d/g, " ");
   var $msg = $('<span class="message"></span>')
   if (!msg.match(/\</) && !msg.match(/\>/)) {
@@ -29,7 +34,7 @@ var createDiv = function(message, username, callback) {
 //add rooms to dropdown
 var addRoom = function(roomname) {
  //to be escaped possibly
-  if ((!app.rooms[roomname]) && roomname && (roomname.length <= 30)) {
+  if ((!app.rooms[roomname]) && roomname && (roomname.length <= 60)) {
     app.rooms[roomname] = roomname;
     var $option = $('<option value=' + roomname + '></option>')
     $option.html(roomname);
@@ -59,7 +64,8 @@ app.rooms = {
 //holds userInfo
 app.userInfo = {
   username : null,
-  roomname : 'hackerjack'
+  roomname : 'hackerjack',
+  friends  : {}
 
 };
 
@@ -221,7 +227,26 @@ $(document).ready(function() {
       //automatically selects new room
       $('option[value="createRoom"]').removeAttr('selected');
     }
+  });
+
+//when username is clicked
+  $('#chats').on('click', '.username', function(){
+    var username = $(this).html()
+    username = username.substring(0, username.length - 2);
+
+   //adds to friend list if not already
+    if (!app.userInfo.friends[username]) {
+
+      app.userInfo.friends[username] = username;
+      console.log('Friend added!');
+    } else {
+      //remove if trying to de-friend
+      delete app.userInfo.friends[username];
+    }
+    
+    app.refresh();
   }); 
+
 });
 
 

@@ -148,5 +148,15 @@ button:hover {
 }
 
 .hidden {
-    display: none;
+   display: none;
+}
+
+.username:hover {
+   cursor: pointer;
+   color: green;
+   text-decoration: underline;
+}
+
+.username.friend {
+    color:green;
 }
