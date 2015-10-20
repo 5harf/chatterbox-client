@@ -6,6 +6,7 @@
 
 =============================*/
 
+
 var createDiv = function(message, username, callback) {
   var $div = $('<div class="messages"></div>');
   var $username = $('<span class="username">' + username + ': ' + '</span>');
@@ -25,6 +26,17 @@ var createDiv = function(message, username, callback) {
 
 };
 
+var addRoom = function(roomname) {
+ //escape later pls
+  if ((!app.rooms[roomname]) && roomname && (roomname.length <= 30)) {
+    app.rooms[roomname] = roomname;
+    var $option = $('<option value=' + roomname + '></option>')
+    $option.html(roomname);
+    $('select[name="chat-rooms"]').prepend($option);
+  }
+}
+
+
 /*========================
 
      GLOBAL APP OBJECT
@@ -37,6 +49,10 @@ app.init = function() {
   app.fetch();
 };
 
+app.rooms = {
+  lobby: "lobby"
+};
+
 app.userInfo = {
   username : null,
   roomname : 'hackerjack'
@@ -46,6 +62,7 @@ app.userInfo = {
 app.server = 'https://api.parse.com/1/classes/chatterbox';
 
 app.send = function(message) {
+
   this.userInfo.username = $('input[name="chat-user"]').val() || 'anonymous';
   var input = message;
   var message = {
@@ -63,7 +80,7 @@ app.send = function(message) {
       console.log('chatterbox: Message sent!');
     },
     error: function (data) {
-      console.error('chatterbox: Failed to send message');
+      console.error('chatterbox: Failed to send message!');
     }
   });
 
@@ -76,20 +93,31 @@ app.fetch = function() {
     success: function(response){
 
      var $div;
-     
       _.each(response.results, function(message) {
-
-        $div = createDiv(message.text, message.username);
+      //filters only objects that have messages && usernames    
+        if (message.text && message.username){
+         //if roomname is default/global or matches current room
+          if (app.userInfo.roomname === "hackerjack" || app.userInfo.roomname === message.roomname) {
+          
+            $div = createDiv(message.text, message.username);
+          
+          //if div is valid, populate  
+            if ($div){
+              $('#chats').append(createDiv(message.text, message.username));
+            }
+            
+          //populates dropdown list with existing rooms  
+            addRoom(message.roomname);
+          
+          }
         
-        if ($div){
-          $('#chats').append(createDiv(message.text, message.username));
         }
 
       });
 
      },
     error: function(error, errorType, errorMessage) {
-      console.log('chatterbox: Failed to fetch messages')
+      console.log('chatterbox: Failed to fetch messages!')
      }
     });
 
@@ -144,17 +172,41 @@ $(document).ready(function() {
 
   $('select').on('change', function(event) {
      var selected = $('option:selected').val();
-     console.log(selected);
+
       if (selected === 'createRoom'){
         $('input[name="newRoom"]').removeClass('hidden');
           app.userInfo.roomname = selected
       }else {
         $('input[name="newRoom"]').addClass('hidden');
-          console.log(selected)
           app.userInfo.roomname = selected;
       };
+      app.refresh()
   });
+
+//checks for created rooms
+  $('input[name="newRoom"]').on('keypress', function(event){
+    if (event.which === 13){
+      event.preventDefault();
+      
+      //get roomname and add room
+      var room = $(this).val();
+
+      //assigns currentroom
+      app.userInfo.roomname = room;
+
+      //adds to list of available rooms
+      addRoom(room);
+      
+      //removes field    
+      $(this).val('');
+      $(this).addClass('hidden');
+
+      //automatically selects new room
+      $('option[value="createRoom"]').removeAttr('selected');
+    }
+  }); 
 });
+
 
 
 app.init();
