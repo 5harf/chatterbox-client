@@ -23,6 +23,7 @@ body {
 }
 
 #main h1 {
+    text-align: center;
     margin-top: 0;
     font-size: 50px;
     margin-bottom: 5px;
@@ -61,11 +62,13 @@ form {
     padding: 20px;
     padding-left: 0;
     margin-bottom: 20px;
+    text-align: center;
+
 }
 
 form input[type=text] {
     margin-right: 10px;
-    width: 70%;
+    width: 50%;
     font-size: 12px;
     padding: 5px;
 }
@@ -121,3 +124,7 @@ form input[type=text] {
     cursor: pointer;
 }
 
+button {
+  display: block;
+  margin: 10px auto;
+}

@@ -1,14 +1,10 @@
 // YOUR CODE HERE:
-/*var message = {
-  username: 'shawndrost',
-  text: 'trololo',
-  roomname: '4chan'
-};*/
-/*
 
-HELPER FUNCTIONS
+/*============================
 
-*/
+      HELPER FUNCTIONS
+
+=============================*/
 
 var createDiv = function(message, username, callback) {
   var $div = $('<div class="messages"></div>');
@@ -29,24 +25,30 @@ var createDiv = function(message, username, callback) {
 
 };
 
-/*
+/*========================
 
-GLOBAL APP OBJECT
+     GLOBAL APP OBJECT
 
-*/
+=========================*/
+
 var app = {};
 
 app.init = function() {
   app.fetch();
 };
 
+app.userInfo = {
+  username : null,
+  roomname :'8th floor'
+};
+
 app.server = 'https://api.parse.com/1/classes/chatterbox';
 
 app.send = function(message) {
-  var user = window.location.search.substring(1).split('=')[1];
+  this.userInfo.username = $('input[name="chat-user"]').val() || 'anonymous';
   var input = message;
   var message = {
-    username: user,
+    username: this.userInfo.username,
     text: input,
     roomname: '8th floor'
   };
@@ -67,20 +69,20 @@ app.send = function(message) {
 };
 
 app.fetch = function() {
-  
+  var username = this.userInfo.username
   $.ajax({ 
     url: this.server, 
     type: 'GET',
     success: function(response){
 
      var $div;
-
+     
       _.each(response.results, function(message) {
 
-        $div = createDiv(message.text, message.username);
+        $div = createDiv(message.text, username);
         
         if ($div){
-          $('#chats').append(createDiv(message.text, message.username));
+          $('#chats').append(createDiv(message.text, username));
         }
 
       });
@@ -115,26 +117,24 @@ app.refresh = function(){
 
 app.addMessage = function(message) {
   this.send(message);  
-  var $msg = createDiv(message.text, message.username);
+  var $msg = createDiv(message.text, this.userInfo.username);
   $('#chats').prepend($msg);
 };
 
-/*
+/*==========================
 
-JQUERY ONREADY
+     JQUERY ONREADY
 
-*/
+=========================*/
 
 $(document).ready(function() {
   $('button').on('click', function(event) {
     event.preventDefault();
     //creating info
    var msg = $('input[name="chat-msg"]').val();
-   
    var message = app.send(msg);
 
-   var user = window.location.search.substring(1).split('=')[1];
-   var $msg = createDiv(msg, user);
+   var $msg = createDiv(msg, app.userInfo.username);
    //adding to DOM
    $('#chats').prepend($msg);
    //send
