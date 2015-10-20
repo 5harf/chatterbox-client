@@ -6,7 +6,7 @@
 
 =============================*/
 
-
+//creates div for messages
 var createDiv = function(message, username, callback) {
   var $div = $('<div class="messages"></div>');
   var $username = $('<span class="username">' + username + ': ' + '</span>');
@@ -26,8 +26,9 @@ var createDiv = function(message, username, callback) {
 
 };
 
+//add rooms to dropdown
 var addRoom = function(roomname) {
- //escape later pls
+ //to be escaped possibly
   if ((!app.rooms[roomname]) && roomname && (roomname.length <= 30)) {
     app.rooms[roomname] = roomname;
     var $option = $('<option value=' + roomname + '></option>')
@@ -46,13 +47,16 @@ var addRoom = function(roomname) {
 var app = {};
 
 app.init = function() {
+  //setup
   app.fetch();
 };
 
+//created available rooms
 app.rooms = {
-  lobby: "lobby"
+
 };
 
+//holds userInfo
 app.userInfo = {
   username : null,
   roomname : 'hackerjack'
@@ -61,6 +65,7 @@ app.userInfo = {
 
 app.server = 'https://api.parse.com/1/classes/chatterbox';
 
+//posts user message to server
 app.send = function(message) {
 
   this.userInfo.username = $('input[name="chat-user"]').val() || 'anonymous';
@@ -86,6 +91,7 @@ app.send = function(message) {
 
 };
 
+//fetches messages from server
 app.fetch = function() {
   $.ajax({ 
     url: this.server, 
@@ -93,7 +99,10 @@ app.fetch = function() {
     success: function(response){
 
      var $div;
+
+     //goes through response-results
       _.each(response.results, function(message) {
+
       //filters only objects that have messages && usernames    
         if (message.text && message.username){
          //if roomname is default/global or matches current room
@@ -123,11 +132,12 @@ app.fetch = function() {
 
 };
 
-app.clearMessages = function() {
   //clears elements from DOM
+app.clearMessages = function() {
    $('#chats').empty();
 };
 
+//escapes strings - to fix encoding to remove % charactres
 app.escape = function (s) {
   return s.split('#').map(function(v) {
       // Only 20% of slashes are end tags; save 1.2% of total
@@ -138,11 +148,13 @@ app.escape = function (s) {
       }).join('');
 };
 
+//refreshes streamm
 app.refresh = function(){
   app.clearMessages();
   app.fetch();
 };
 
+//adds message to stream
 app.addMessage = function(message) {
   this.send(message);  
   var $msg = createDiv(message, app.userInfo.username);
@@ -156,11 +168,15 @@ app.addMessage = function(message) {
 =========================*/
 
 $(document).ready(function() {
+  
+  //initialize app
+  app.init();
+
+  //posts a message
   $('button').on('click', function(event) {
     event.preventDefault();
     //creating info
    var msg = $('input[name="chat-msg"]').val();
-   //adds message
    app.addMessage(msg);
    $('input[name="chat-msg"]').val('');
   });
@@ -170,6 +186,7 @@ $(document).ready(function() {
     app.refresh();
   });
 
+//changes rooms
   $('select').on('change', function(event) {
      var selected = $('option:selected').val();
 
@@ -183,7 +200,7 @@ $(document).ready(function() {
       app.refresh()
   });
 
-//checks for created rooms
+//create new room
   $('input[name="newRoom"]').on('keypress', function(event){
     if (event.which === 13){
       event.preventDefault();
@@ -207,8 +224,5 @@ $(document).ready(function() {
   }); 
 });
 
-
-
-app.init();
 
 
