@@ -69,7 +69,7 @@ app.userInfo = {
 
 };
 
-app.server = 'https://api.parse.com/1/classes/chatterbox';
+app.server = 'http://127.0.0.1:3000/classes/';
 
 //posts user message to server
 app.send = function(message) {
@@ -86,6 +86,7 @@ app.send = function(message) {
     url: this.server,
     type: 'POST',
     data: JSON.stringify(message),
+    // data: JSON.stringify(message),
     contentType: 'application/json',
     success: function (data) {
       console.log('chatterbox: Message sent!');
@@ -102,12 +103,14 @@ app.fetch = function() {
   $.ajax({ 
     url: this.server, 
     type: 'GET',
+    contentType: 'application/json',
     success: function(response){
-
+      var result = JSON.parse(response).results;
+      console.log(response);
      var $div;
 
      //goes through response-results
-      _.each(response.results, function(message) {
+      _.each(result, function(message) {
 
       //filters only objects that have messages && usernames    
         if (message.text && message.username){
@@ -120,7 +123,7 @@ app.fetch = function() {
             if ($div){
               $('#chats').append(createDiv(message.text, message.username));
             }
-            
+             
           //populates dropdown list with existing rooms  
             addRoom(message.roomname);
           
